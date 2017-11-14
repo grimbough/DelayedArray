@@ -777,8 +777,12 @@ setReplaceMethod("[", "DelayedArray", .subassign_DelayedArray)
     x_dimnames <- dimnames(x)
     effdim_idx <- which(x_dim != 1L)  # index of effective dimensions
     if (length(effdim_idx) >= 2L) {
-        dim(x) <- x_dim[effdim_idx]
-        dimnames(x) <- x_dimnames[effdim_idx]
+        ## changing dim(x) results in a memory copy which is slow
+        ## here we catch if it will actually change anything and avoid if not
+        if( !(identical(dim(x), x_dim[effdim_idx])) ) {
+            dim(x) <- x_dim[effdim_idx]
+            dimnames(x) <- x_dimnames[effdim_idx]
+        }
     } else {
         dim(x) <- NULL
         if (length(effdim_idx) == 1L)
@@ -837,8 +841,10 @@ slicing_tip <- c(
                   "cannot be coerced to a matrix. ", slicing_tip))
     ans <- as.array(x, drop=TRUE)
     if (length(x_dim) == 2L) {
-        dim(ans) <- x_dim
-        dimnames(ans) <- dimnames(x)
+        if(!identical(dim(ans), x_dim)) {
+            dim(ans) <- x_dim
+            dimnames(ans) <- dimnames(x)
+        }
     } else {
         as.matrix(ans)
     }
