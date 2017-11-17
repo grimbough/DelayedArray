@@ -798,9 +798,15 @@ setReplaceMethod("[", "DelayedArray", .subassign_DelayedArray)
     if (!isTRUEorFALSE(drop))
         stop("'drop' must be TRUE or FALSE")
     ans <- subset_seed_as_array(seed(x), unname(x@index))
-    dim(ans) <- .get_DelayedArray_dim_before_transpose(x)
+    dim_ans <- .get_DelayedArray_dim_before_transpose(x)
+    if(!identical(dim(ans), dim_ans)) {
+        dim(ans) <- dim_ans
+    }
     ans <- .execute_delayed_ops(ans, x@delayed_ops)
-    dimnames(ans) <- .get_DelayedArray_dimnames_before_transpose(x)
+    dimnames_ans <- .get_DelayedArray_dimnames_before_transpose(x)
+    if(!identical(dimnames(ans), dimnames_ans)) {
+        dimnames(ans) <- dimnames_ans
+    }
     if (drop)
         ans <- .reduce_array_dimensions(ans)
     ## Base R doesn't support transposition of an array of arbitrary dimension
